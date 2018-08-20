@@ -1,0 +1,8 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="ActionsMaster.master.cs" Inherits="Actions_ActionMaster" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" Runat="Server">
+    <h1>Actions</h1>
+    <asp:ContentPlaceHolder ID="ActionsMainContent" runat="server">
+    </asp:ContentPlaceHolder> 
+</asp:Content>
+

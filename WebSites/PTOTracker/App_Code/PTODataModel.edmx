@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="PTODataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Employee">
+          <Key>
+            <PropertyRef Name="EmployeeId" />
+          </Key>
+          <Property Name="EmployeeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeName" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="EmployeeRoleId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmployeePTOHistory">
+          <Key>
+            <PropertyRef Name="EmployeePTOHistoryID" />
+          </Key>
+          <Property Name="EmployeePTOHistoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeID" Type="int" Nullable="false" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndDate" Type="date" Nullable="false" />
+          <Property Name="PTOAmount" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="50" />
+          <Property Name="ResultingPTOBalance" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmployeeRequest">
+          <Key>
+            <PropertyRef Name="EmployeeRequestId" />
+          </Key>
+          <Property Name="EmployeeRequestId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeId" Type="int" Nullable="false" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndDate" Type="date" Nullable="false" />
+          <Property Name="PTOAmount" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="EmployeeRole">
+          <Key>
+            <PropertyRef Name="EmployeeRoleId" />
+          </Key>
+          <Property Name="EmployeeRoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoleName" Type="varchar" MaxLength="15" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_EmployeeId">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
+          <End Role="EmployeeRequest" Type="Self.EmployeeRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeId" />
+            </Principal>
+            <Dependent Role="EmployeeRequest">
+              <PropertyRef Name="EmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeePTOHistory_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="1" />
+          <End Role="EmployeePTOHistory" Type="Self.EmployeePTOHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeId" />
+            </Principal>
+            <Dependent Role="EmployeePTOHistory">
+              <PropertyRef Name="EmployeeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeRoleId">
+          <End Role="EmployeeRole" Type="Self.EmployeeRole" Multiplicity="1" />
+          <End Role="Employee" Type="Self.Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmployeeRole">
+              <PropertyRef Name="EmployeeRoleId" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="EmployeeRoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="AutoAccrual" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="employeeID" Type="int" Mode="In" />
+          <Parameter Name="newBalance" Type="decimal" Mode="In" />
+        </Function>
+        <Function Name="ConvertRequestToHistory" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="newBalance" Type="decimal" Mode="In" />
+          <Parameter Name="employeeRequestID" Type="int" Mode="In" />
+        </Function>
+        <Function Name="Reset" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="asOfDate" Type="date" Mode="In" />
+        </Function>
+        <Function Name="SubmitEmployeePTOHistory" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="employeeID" Type="int" Mode="In" />
+          <Parameter Name="ptoAmount" Type="decimal" Mode="In" />
+          <Parameter Name="startDate" Type="date" Mode="In" />
+          <Parameter Name="endDate" Type="date" Mode="In" />
+          <Parameter Name="description" Type="varchar" Mode="In" />
+          <Parameter Name="resultingPTOBalance" Type="decimal" Mode="In" />
+        </Function>
+        <Function Name="SubmitEmployeeRequest" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="employeeID" Type="int" Mode="In" />
+          <Parameter Name="ptoAmount" Type="decimal" Mode="In" />
+          <Parameter Name="startDate" Type="date" Mode="In" />
+          <Parameter Name="endDate" Type="date" Mode="In" />
+          <Parameter Name="description" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="PTODataModelStoreContainer">
+          <EntitySet Name="Employee" EntityType="Self.Employee" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeePTOHistory" EntityType="Self.EmployeePTOHistory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeRequest" EntityType="Self.EmployeeRequest" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeRole" EntityType="Self.EmployeeRole" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_EmployeeId" Association="Self.FK_EmployeeId">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="EmployeeRequest" EntitySet="EmployeeRequest" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeePTOHistory_Employee" Association="Self.FK_EmployeePTOHistory_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="EmployeePTOHistory" EntitySet="EmployeePTOHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeRoleId" Association="Self.FK_EmployeeRoleId">
+            <End Role="EmployeeRole" EntitySet="EmployeeRole" />
+            <End Role="Employee" EntitySet="Employee" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="PTODataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Employee">
+          <Key>
+            <PropertyRef Name="EmployeeId" />
+          </Key>
+          <Property Name="EmployeeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="EmployeeRoleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EmployeeRole" Relationship="Self.FK_EmployeeRoleId" FromRole="Employee" ToRole="EmployeeRole" />
+          <NavigationProperty Name="EmployeeRequests" Relationship="PTODataModel.FK_EmployeeId1" FromRole="Employee" ToRole="EmployeeRequest" />
+          <NavigationProperty Name="EmployeePTOHistories" Relationship="PTODataModel.FK_EmployeePTOHistory_Employee" FromRole="Employee" ToRole="EmployeePTOHistory" />
+        </EntityType>
+        <EntityType Name="EmployeeRole">
+          <Key>
+            <PropertyRef Name="EmployeeRoleId" />
+          </Key>
+          <Property Name="EmployeeRoleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleName" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Employees" Relationship="Self.FK_EmployeeRoleId" FromRole="EmployeeRole" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_EmployeeRoleId">
+          <End Role="EmployeeRole" Type="Self.EmployeeRole" Multiplicity="1" />
+          <End Role="Employee" Type="Self.Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmployeeRole">
+              <PropertyRef Name="EmployeeRoleId" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="EmployeeRoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="PTODataEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Employees" EntityType="Self.Employee" />
+          <EntitySet Name="EmployeeRoles" EntityType="Self.EmployeeRole" />
+          <AssociationSet Name="FK_EmployeeRoleId" Association="Self.FK_EmployeeRoleId">
+            <End Role="EmployeeRole" EntitySet="EmployeeRoles" />
+            <End Role="Employee" EntitySet="Employees" />
+          </AssociationSet>
+          <EntitySet Name="EmployeePTOHistories" EntityType="PTODataModel.EmployeePTOHistory" />
+          <EntitySet Name="EmployeeRequests" EntityType="PTODataModel.EmployeeRequest" />
+          <AssociationSet Name="FK_EmployeeId1" Association="PTODataModel.FK_EmployeeId1">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="EmployeeRequest" EntitySet="EmployeeRequests" />
+          </AssociationSet>
+          <FunctionImport Name="SubmitEmployeeRequest">
+            <Parameter Name="employeeID" Mode="In" Type="Int32" />
+            <Parameter Name="ptoAmount" Mode="In" Type="Decimal" />
+            <Parameter Name="startDate" Mode="In" Type="DateTime" />
+            <Parameter Name="endDate" Mode="In" Type="DateTime" />
+            <Parameter Name="description" Mode="In" Type="String" />
+          </FunctionImport>
+          <AssociationSet Name="FK_EmployeePTOHistory_Employee" Association="PTODataModel.FK_EmployeePTOHistory_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="EmployeePTOHistory" EntitySet="EmployeePTOHistories" />
+          </AssociationSet>
+          <FunctionImport Name="ExecuteDailyRequests" />
+          <FunctionImport Name="SubmitEmployeePTOHistory">
+            <Parameter Name="employeeID" Mode="In" Type="Int32" />
+            <Parameter Name="ptoAmount" Mode="In" Type="Decimal" />
+            <Parameter Name="startDate" Mode="In" Type="DateTime" />
+            <Parameter Name="endDate" Mode="In" Type="DateTime" />
+            <Parameter Name="description" Mode="In" Type="String" />
+            <Parameter Name="resultingPTOBalance" Mode="In" Type="Decimal" />
+          </FunctionImport>
+          <FunctionImport Name="AutoAccrual">
+            <Parameter Name="employeeID" Mode="In" Type="Int32" />
+            <Parameter Name="newBalance" Mode="In" Type="Decimal" />
+          </FunctionImport>
+          <FunctionImport Name="ConvertRequestToHistory">
+          <Parameter Name="newBalance" Mode="In" Type="Decimal" />
+            <Parameter Name="employeeRequestID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="Reset">
+          <Parameter Name="asOfDate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+        </EntityContainer>
+        <EntityType Name="EmployeePTOHistory">
+          <Key>
+            <PropertyRef Name="EmployeePTOHistoryID" />
+          </Key>
+          <Property Name="EmployeePTOHistoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeID" Type="Int32" Nullable="false" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="PTOAmount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ResultingPTOBalance" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <NavigationProperty Name="Employee" Relationship="PTODataModel.FK_EmployeePTOHistory_Employee" FromRole="EmployeePTOHistory" ToRole="Employee" />
+        </EntityType>
+        <EntityType Name="EmployeeRequest">
+          <Key>
+            <PropertyRef Name="EmployeeRequestId" />
+          </Key>
+          <Property Name="EmployeeRequestId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeId" Type="Int32" Nullable="false" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="PTOAmount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Employee" Relationship="PTODataModel.FK_EmployeeId1" FromRole="EmployeeRequest" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_EmployeeId1">
+          <End Type="PTODataModel.Employee" Role="Employee" Multiplicity="1" />
+          <End Type="PTODataModel.EmployeeRequest" Role="EmployeeRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeId" />
+            </Principal>
+            <Dependent Role="EmployeeRequest">
+              <PropertyRef Name="EmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeePTOHistory_Employee">
+          <End Type="PTODataModel.Employee" Role="Employee" Multiplicity="1" />
+          <End Type="PTODataModel.EmployeePTOHistory" Role="EmployeePTOHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmployeeId" />
+            </Principal>
+            <Dependent Role="EmployeePTOHistory">
+              <PropertyRef Name="EmployeeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="PTODataModelStoreContainer" CdmEntityContainer="PTODataEntities">
+          <EntitySetMapping Name="Employees">
+            <EntityTypeMapping TypeName="PTODataModel.Employee">
+              <MappingFragment StoreEntitySet="Employee">
+                <ScalarProperty Name="EmployeeId" ColumnName="EmployeeId" />
+                <ScalarProperty Name="EmployeeName" ColumnName="EmployeeName" />
+                <ScalarProperty Name="EmployeeRoleId" ColumnName="EmployeeRoleId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmployeeRoles">
+            <EntityTypeMapping TypeName="PTODataModel.EmployeeRole">
+              <MappingFragment StoreEntitySet="EmployeeRole">
+                <ScalarProperty Name="EmployeeRoleId" ColumnName="EmployeeRoleId" />
+                <ScalarProperty Name="RoleName" ColumnName="RoleName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmployeePTOHistories">
+            <EntityTypeMapping TypeName="PTODataModel.EmployeePTOHistory">
+              <MappingFragment StoreEntitySet="EmployeePTOHistory">
+                <ScalarProperty Name="ResultingPTOBalance" ColumnName="ResultingPTOBalance" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="PTOAmount" ColumnName="PTOAmount" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="EmployeePTOHistoryID" ColumnName="EmployeePTOHistoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmployeeRequests">
+            <EntityTypeMapping TypeName="PTODataModel.EmployeeRequest">
+              <MappingFragment StoreEntitySet="EmployeeRequest">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="PTOAmount" ColumnName="PTOAmount" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EmployeeId" ColumnName="EmployeeId" />
+                <ScalarProperty Name="EmployeeRequestId" ColumnName="EmployeeRequestId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="SubmitEmployeeRequest" FunctionName="PTODataModel.Store.SubmitEmployeeRequest" />
+          <FunctionImportMapping FunctionImportName="SubmitEmployeePTOHistory" FunctionName="PTODataModel.Store.SubmitEmployeePTOHistory" />
+          <FunctionImportMapping FunctionImportName="AutoAccrual" FunctionName="PTODataModel.Store.AutoAccrual" />
+          <FunctionImportMapping FunctionImportName="ConvertRequestToHistory" FunctionName="PTODataModel.Store.ConvertRequestToHistory" />
+          <FunctionImportMapping FunctionImportName="Reset" FunctionName="PTODataModel.Store.Reset" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
